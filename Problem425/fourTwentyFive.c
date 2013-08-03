@@ -263,6 +263,7 @@ int main(int argc, char *argv[])
 {
   int i;
   int sum = 0;
+  int last = 2;
   integer_list a;
 
 
@@ -294,6 +295,19 @@ int main(int argc, char *argv[])
        * 6. Find the first prime Q such that Q.x = 1 and Q.y = 1
        * 7. Mark p.x = 1 for all p >= Q. Decrement notP while doing so.
        */
+
+      
+      while(1)
+	{
+	  last++;
+	  if (prime_q(last) == 0 || mList[last].x == 1)
+	    {
+	      continue;
+	    }
+	  break;
+	}
+
+      notP = 0;
     }
 
   return 0;
