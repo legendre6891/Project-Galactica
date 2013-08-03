@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../clib/memoization.h"
+/* #include "../clib/memoization.h" */
 #include "../clib/digits.h"
 #include "../clib/list_utilities.h"
 #include "../clib/prime_q.h"
@@ -7,8 +7,8 @@
 
 
 #define SOME_MEMOIZATION_CONTEXT 0
-#define UPPER_LIMIT 10000000
-#define PI_UPPER_LIMIT 664579
+#define UPPER_LIMIT 1000
+#define PI_UPPER_LIMIT 168
 
 
 
@@ -122,6 +122,11 @@ int chop_left(int n)
   else
     {
       integer_list a = dice_integer(n);
+      if (a.xs[1] == 0)
+	{
+	  free(a.xs);
+	  return 0;
+	}
       integer_list b;
       b.len = a.len - 1;
       b.xs = malloc(sizeof(int) * b.len);
@@ -190,35 +195,35 @@ integer_list connected(int n)
 
 
 /* short admissable(int a, int b) */
-MEMOIZED_FUNCT(SOME_MEMOIZATION_CONTEXT, short, admissable, int, a, int, b)
-{
-  if (prime_q(a) == 0 || prime_q(b) == 0)
-    return 0;
+/* MEMOIZED_FUNCT(SOME_MEMOIZATION_CONTEXT, short, admissable, int, a, int, b) */
+/* { */
+/*   if (prime_q(a) == 0 || prime_q(b) == 0) */
+/*     return 0; */
 
-  if (a == b)
-    return 1;
+/*   if (a == b) */
+/*     return 1; */
 
   
-  integer_list l;
-  l = connected(b);
+/*   integer_list l; */
+/*   l = connected(b); */
 
 
-  for (int i = 0; i < l.len; ++i)
-    {
-      if (l.xs[i] >= b)
-	continue;
-      if (admissable(a, l.xs[i]) != 0)
-	return 1;
-    }
+/*   for (int i = 0; i < l.len; ++i) */
+/*     { */
+/*       if (l.xs[i] >= b) */
+/* 	continue; */
+/*       if (admissable(a, l.xs[i]) != 0) */
+/* 	return 1; */
+/*     } */
   
-  return 0;
-}
+/*   return 0; */
+/* } */
 
 
 short two_admissable(int a)
 {
-  if (prime_q(a) == 0)
-    return 0;
+  /* if (prime_q(a) == 0) */
+  /*   return 0; */
 
   if (a == 2)
     return 1;
@@ -245,20 +250,53 @@ void initialize_mList()
 {
   for (int i = 0; i < UPPER_LIMIT; ++i)
     {
-      printf ("%d\n",i);
+      if (prime_q(i) == 0)
+	continue;
+      /* printf("%d\n", i); */
       mList[i].x = two_admissable(i);
+      if (mList[i].x == 1)
+	notP--;
     }
 }
 
 int main(int argc, char *argv[])
 {
   int i;
-  int sum;
+  int sum = 0;
   integer_list a;
+
+
+  /* a = connected(103); */
+  /* print_list(a); */
+  /* return 0; */
   
   initialize_mList();
-  
 
+  /* for (i = 0; i < UPPER_LIMIT; ++i) */
+  /*   { */
+  /*     if (prime_q(i) == 0) */
+  /* 	continue; */
+  /*     if (mList[i].x == 0) */
+  /* 	printf ("%d\n",i); */
+      
+  /*   } */
+
+  /* printf ("%d\n", notP); */
+
+  while(notP != 0)
+    {
+      /*
+       * 1. Find the first x = 0 element; Call this q. Dec. notP
+       * 2. Add this to the sum; 
+       * 3. Mark its x = -1
+       * 4. Save it somewhere.
+       * 5. Mark y = 1 for all q-admissable primes.
+       * 6. Find the first prime Q such that Q.x = 1 and Q.y = 1
+       * 7. Mark p.x = 1 for all p >= Q. Decrement notP while doing so.
+       */
+    }
+
+  return 0;
 
   for (i = 0; i < UPPER_LIMIT; ++i)
     {
@@ -267,49 +305,5 @@ int main(int argc, char *argv[])
       printf("[x, y] at %d = [%d, %d]\n", i, mList[i].x, mList[i].y);
       
     }
-
-  /* initGlobalMemoizationContexts(); */
-  /* enableGlobalMemoizationContext(SOME_MEMOIZATION_CONTEXT); */
-
-  /* print_list(p[8]); */
-  /* for (i = 0; i < 8; i++) */
-  /*   printf("%d\n", from_digits(p[i])); */
- 
-  /* a = connected(999999); */
-  /* print_list(a); */
-  /* free(a.xs); */
-
-
-  /* printf ("%d\n", admissable(2,999991)); */
-  /* return 0; */
-  /* for (i = 1; i < 10000000; ++i) */
-  /*   { */
-  /*     if (prime_q(i) == 0) */
-  /* 	continue; */
-  /*     else */
-  /* 	{ */
-  /* 	  printf("%d\n", i); */
-  /* 	  printf("admissable(2,i) = %d\n", admissable(2,i)); */
-  /* 	  continue; */
-  /* 	} */
-
-  /*     a = connected(i); */
-  /*     printf("%d\n", i); */
-  /*     free(a.xs); */
-  /*   } */
-  /* for (i = 0; i < 10000000; ++i) */
-  /*   { */
-  /*     IntegerLength(i); */
-  /*     /\* a = dice_integer(i); *\/ */
-  /*     /\* from_digits(a); *\/ */
-  /*     /\* print_list(a); *\/ */
-  /*     /\* printf ("%d\n", from_digits(a)); *\/ */
-
-  /*     /\* free(a.xs); *\/ */
-  /*   } */
-
-  /* disableGlobalMemoizationContext(SOME_MEMOIZATION_CONTEXT); */
-  /* freeGlobalMemoizationContexts(); */
-
   return 0;
 }
