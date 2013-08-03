@@ -7,8 +7,8 @@
 
 
 #define SOME_MEMOIZATION_CONTEXT 0
-
-
+#define UPPER_LIMIT 10000000
+#define PI_UPPER_LIMIT 664579
 
 
 
@@ -19,6 +19,20 @@ struct _integer_list
 };
 
 typedef struct _integer_list integer_list;
+
+
+
+struct _pair
+{
+  short x;
+  short y;
+};
+
+typedef struct _pair pair;
+
+pair mList[UPPER_LIMIT];
+int notP = PI_UPPER_LIMIT;
+
 
 integer_list dice_integer(int n)
 {
@@ -199,23 +213,63 @@ MEMOIZED_FUNCT(SOME_MEMOIZATION_CONTEXT, short, admissable, int, a, int, b)
   
   return 0;
 }
+
+
+short two_admissable(int a)
+{
+  if (prime_q(a) == 0)
+    return 0;
+
+  if (a == 2)
+    return 1;
+
   
+  integer_list l;
+  l = connected(a);
+
+
+  for (int i = 0; i < l.len; ++i)
+    {
+      if (l.xs[i] >= a)
+	continue;
+      if (mList[l.xs[i]].x == 1)
+	return 1;
+    }
   
+  free(l.xs);
+  return 0;
+}  
+
+
+void initialize_mList()
+{
+  for (int i = 0; i < UPPER_LIMIT; ++i)
+    {
+      printf ("%d\n",i);
+      mList[i].x = two_admissable(i);
+    }
+}
 
 int main(int argc, char *argv[])
 {
   int i;
+  int sum;
   integer_list a;
   
-  a = dice_integer(125);
-  free(a.xs);
-
-  initGlobalMemoizationContexts();
-  enableGlobalMemoizationContext(SOME_MEMOIZATION_CONTEXT);
+  initialize_mList();
+  
 
 
+  for (i = 0; i < UPPER_LIMIT; ++i)
+    {
+      if (prime_q(i) == 0)
+	continue;
+      printf("[x, y] at %d = [%d, %d]\n", i, mList[i].x, mList[i].y);
+      
+    }
 
-
+  /* initGlobalMemoizationContexts(); */
+  /* enableGlobalMemoizationContext(SOME_MEMOIZATION_CONTEXT); */
 
   /* print_list(p[8]); */
   /* for (i = 0; i < 8; i++) */
@@ -228,21 +282,21 @@ int main(int argc, char *argv[])
 
   /* printf ("%d\n", admissable(2,999991)); */
   /* return 0; */
-  for (i = 1; i < 10000000; ++i)
-    {
-      if (prime_q(i) == 0)
-	continue;
-      else
-	{
-	  printf("%d\n", i);
-	  printf("admissable(2,i) = %d\n", admissable(2,i));
-	  continue;
-	}
+  /* for (i = 1; i < 10000000; ++i) */
+  /*   { */
+  /*     if (prime_q(i) == 0) */
+  /* 	continue; */
+  /*     else */
+  /* 	{ */
+  /* 	  printf("%d\n", i); */
+  /* 	  printf("admissable(2,i) = %d\n", admissable(2,i)); */
+  /* 	  continue; */
+  /* 	} */
 
-      a = connected(i);
-      printf("%d\n", i);
-      free(a.xs);
-    }
+  /*     a = connected(i); */
+  /*     printf("%d\n", i); */
+  /*     free(a.xs); */
+  /*   } */
   /* for (i = 0; i < 10000000; ++i) */
   /*   { */
   /*     IntegerLength(i); */
@@ -254,8 +308,8 @@ int main(int argc, char *argv[])
   /*     /\* free(a.xs); *\/ */
   /*   } */
 
-  disableGlobalMemoizationContext(SOME_MEMOIZATION_CONTEXT);
-  freeGlobalMemoizationContexts();
+  /* disableGlobalMemoizationContext(SOME_MEMOIZATION_CONTEXT); */
+  /* freeGlobalMemoizationContexts(); */
 
   return 0;
 }
