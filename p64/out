@@ -1,0 +1,1 @@
+Print[Count[OddQ/@Length/@Last/@ContinuedFraction@Sqrt@Range@10000,True]]
