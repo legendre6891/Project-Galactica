@@ -3,12 +3,14 @@
 
 void print_integer_list(int* xs, int length)
 {
-  printf ("[ ");
+  printf ("{ ");
   int i = 0;
   for (i = 0; i < length; i++)
     {
-      printf ("%d, ", xs[i]);
+      printf ("%d", xs[i]);
+      if (i != length - 1)
+	printf (", ");
     }
-  printf("]\n");
+  printf("};\n");
   return;
 }

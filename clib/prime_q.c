@@ -7,5 +7,11 @@ int prime_q(unsigned long int n)
   mpz_init(tester);
   
   mpz_set_ui(tester, n);
-  return mpz_probab_prime_p(tester, 25);
+  int r = mpz_probab_prime_p(tester, 25);
+
+
+  mpz_clear(tester);
+
+  return r;
+
 }

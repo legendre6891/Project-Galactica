@@ -7,20 +7,18 @@
 
 
 #define SOME_MEMOIZATION_CONTEXT 0
-#define UPPER_LIMIT 1000
-#define PI_UPPER_LIMIT 168
+#define UPPER_LIMIT 10000000
+#define PI_UPPER_LIMIT 1229
 
 
 
 struct _integer_list
 {
   int* xs;
-  int len;
+  short len;
 };
 
 typedef struct _integer_list integer_list;
-
-
 
 struct _pair
 {
@@ -32,7 +30,7 @@ typedef struct _pair pair;
 
 pair mList[UPPER_LIMIT];
 int notP = PI_UPPER_LIMIT;
-
+integer_list *ALL[UPPER_LIMIT];
 
 integer_list dice_integer(int n)
 {
@@ -48,6 +46,7 @@ void print_list(integer_list l)
   return;
 }
 
+/* MEMOIZED_FUNCT(SOME_MEMOIZATION_CONTEXT,int, from_digits, integer_list, l) */
 int from_digits(integer_list l)
 {
   int r = 0;
@@ -61,6 +60,7 @@ int from_digits(integer_list l)
   return r;
 }
 
+/* MEMOIZED_FUNCT(SOME_MEMOIZATION_CONTEXT, integer_list*, change_kth_digit, integer_list, L, int, k) */
 integer_list* change_kth_digit(integer_list L, int k)
 {
   int m;
@@ -152,10 +152,7 @@ integer_list connected(int n)
   result.len = 9*(a.len);
   result.xs = malloc(sizeof(int) * result.len);
 
-
-
   int i,j,k,l;
-  
 
   // first gather all the change digits;
   i = 0;
@@ -178,16 +175,10 @@ integer_list connected(int n)
 	}
       free(p);
     }
-  assert(i == 9*a.len - 1);
+  /* assert(i == 9*a.len - 1); */
   result.xs[i] = chop_left(n);
-
-
-
-
-
   // don't forget to free a.xs!
   // also p and p.xs!!
-
   free(a.xs);
   return result;
 }
@@ -238,7 +229,10 @@ short two_admissable(int a)
       if (l.xs[i] >= a)
 	continue;
       if (mList[l.xs[i]].x == 1)
-	return 1;
+	{
+	  free(l.xs);
+	  return 1;
+	}
     }
   
   free(l.xs);
@@ -254,22 +248,98 @@ void initialize_mList()
 	continue;
       /* printf("%d\n", i); */
       mList[i].x = two_admissable(i);
+      mList[i].y = 0;
       if (mList[i].x == 1)
 	notP--;
     }
 }
 
+
+void mark(int q)
+{
+  mList[q].y = 1;
+
+  int p;
+  for (p = q+1; p < UPPER_LIMIT; ++p)
+    {
+      if (prime_q(p) == 0)
+	{
+	  /* mList[p].x = 0; */
+	  /* mList[p].y = 0; */
+	  continue;
+	}
+      
+      mList[p].y = 0;
+
+      integer_list l;
+      l = connected(p);
+      
+      for (int i = 0; i < l.len; ++i)
+	{
+	  if (l.xs[i] >= p)
+	    continue;
+	  if (mList[l.xs[i]].y == 1)
+	    {
+	      mList[p].y = 1;
+	      if (p == 2053)
+		{
+		  printf("marking y: p = 2053: q = %d, l.xs[i] = %d\n", q, l.xs[i]);
+		}
+	      break;
+	    }
+	}
+      free(l.xs);
+    }
+  return;
+}
+
 int main(int argc, char *argv[])
 {
-  int i;
+  /* initGlobalMemoizationContexts(); */
+  /* enableGlobalMemoizationContext(SOME_MEMOIZATION_CONTEXT); */
+
+  long int i;
   int sum = 0;
   int last = 2;
   integer_list a;
+  
 
 
-  /* a = connected(103); */
-  /* print_list(a); */
-  /* return 0; */
+  for (i = 1; i < UPPER_LIMIT; ++i)
+    {
+      if (prime_q(i) != 0)
+      /* printf("int qConnected%d[] = ", i); */
+      /* a = connected(i); */
+	ALL[i] = connected(i);
+      printf ("%d\n",i);
+      /* print_list(a); */
+
+      /* printf("int lConnected%d = %d;\n", i, a.len); */
+      /* free(a.xs); */
+    }
+
+  /* printf ("int* qConnected[] = {NULL, "); */
+  /* for (i = 1; i < UPPER_LIMIT; ++i) */
+  /*   { */
+  /*     printf ("qConnected%d", i); */
+  /*     if (i != UPPER_LIMIT - 1) */
+  /* 	printf(", "); */
+  /*   } */
+  /* printf("};\n"); */
+
+
+  printf ("int lConnected[] = {-1, ");
+  for (i = 1; i < UPPER_LIMIT; ++i)
+    {
+      printf ("lConnected%d", i);
+      if (i != UPPER_LIMIT - 1)
+	printf(", ");
+    }
+  printf("};\n");
+
+
+
+  return 0;
   
   initialize_mList();
 
@@ -293,23 +363,90 @@ int main(int argc, char *argv[])
        * 4. Save it somewhere.
        * 5. Mark y = 1 for all q-admissable primes.
        * 6. Find the first prime Q such that Q.x = 1 and Q.y = 1
-       * 7. Mark p.x = 1 for all p >= Q. Decrement notP while doing so.
+       * 7. Mark p.x = 1 for all p >= Q, p.y = 1. Decrement notP while doing so.
+       * 8. Mark y = 0 for all p >= q.
        */
 
-      
+      // Step 1 and 4.
       while(1)
 	{
 	  last++;
+	  /* printf ("last = %d, notP = %d\n", last, notP); */
 	  if (prime_q(last) == 0 || mList[last].x == 1)
 	    {
 	      continue;
 	    }
 	  break;
 	}
+      notP--;
+      printf ("last = %d, notP = %d\n", last, notP);
+      /* if (mList[last].x == -2) */
+      /* 	continue; */
+	
 
-      notP = 0;
+      // Step 2.
+      sum += last;
+
+      // Step 3.
+      mList[last].x = -1;
+      
+      // Step 5.
+      mark(last);
+
+      /* for (int b = 0; b < UPPER_LIMIT; ++b) */
+      /* 	{ */
+      /* 	  if (prime_q(b) != 0) */
+      /* 	    printf("%d -- [%d, %d]\n", b, mList[b].x, mList[b].y); */
+      /* 	} */
+
+      // Step 6.
+      int Q;
+      for (Q = last; Q < UPPER_LIMIT; Q++)
+	{
+	  if (prime_q(Q) == 0)
+	    {
+	      continue;
+	    }
+	  if (mList[Q].x == 1 && mList[Q].y==1)
+	    {
+	      break;
+	    }
+	}
+      /* printf ("For q = %d, Q = %d\n",last ,Q); */
+      
+
+      // steps 7 and 8
+      for (int p = Q; p < UPPER_LIMIT; ++p)
+	{
+	  if (prime_q(p) == 0)
+	    continue;
+	  if (mList[p].y == 1 && mList[p].x == 0)
+	    {
+	      mList[p].x = 1;
+	      notP--;
+	    }
+	  mList[p].y = 0;
+	}
+
+      /* // OPTMIZATION! */
+      /* for (int p = last + 1; p < Q; ++p) */
+      /* 	{ */
+      /* 	  if (prime_q(p) == 0) */
+      /* 	    continue; */
+      /* 	  sum+=p; */
+	  
+      /* 	  mList[p].x = -2; */
+      /* 	} */
+
+
+
+      for (int z = 0; z < Q; ++z)
+	{
+	  mList[z].y = 0;
+	}
     }
 
+  printf ("sum = %d\n", sum);
   return 0;
 
   for (i = 0; i < UPPER_LIMIT; ++i)
@@ -317,7 +454,10 @@ int main(int argc, char *argv[])
       if (prime_q(i) == 0)
 	continue;
       printf("[x, y] at %d = [%d, %d]\n", i, mList[i].x, mList[i].y);
-      
     }
+
+  /* disableGlobalMemoizationContext(SOME_MEMOIZATION_CONTEXT); */
+  /* freeGlobalMemoizationContexts(); */
+
   return 0;
 }
